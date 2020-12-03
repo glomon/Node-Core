@@ -55,7 +55,7 @@ bool check_sign(const DataContainer& data, const SignContainer& sign, const PubK
 template <typename PubKContainer>
 std::array<char, 25> get_address(const PubKContainer& bpubk);
 
-std::string get_contract_address(const std::string& addr, uint64_t nonce);
+//std::string get_contract_address(const std::string& addr, uint64_t nonce);
 
 template <typename PubKContainer, typename PrivKContainer>
 bool generate_public_key(PubKContainer& pub_key, const PrivKContainer& private_key);

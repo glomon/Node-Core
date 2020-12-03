@@ -1,6 +1,6 @@
 #include "open_ssl_decor.h"
 
-#include "keccak.h"
+//#include "keccak.h"
 
 std::vector<unsigned char> int_as_varint_array(uint64_t value)
 {
@@ -53,104 +53,104 @@ std::vector<unsigned char> hex2bin(const std::string_view src)
     return dest;
 }
 
-template <typename Message>
-sha256_2 keccak(const Message& data)
-{
-    sha256_2 hs;
-    CryptoPP::Keccak k(SHA256_DIGEST_LENGTH);
-    k.Update(data.data(), data.size());
-    k.TruncatedFinal(hs.data(), SHA256_DIGEST_LENGTH);
-    return hs;
-}
+//template <typename Message>
+//sha256_2 keccak(const Message& data)
+//{
+//    sha256_2 hs;
+//    CryptoPP::Keccak k(SHA256_DIGEST_LENGTH);
+//    k.Update(data.data(), data.size());
+//    k.TruncatedFinal(hs.data(), SHA256_DIGEST_LENGTH);
+//    return hs;
+//}
+//
+//std::vector<unsigned char> IntToRLP(uint64_t value)
+//{
+//    std::vector<unsigned char> ret_data;
+//
+//    if (value == 0) {
+//        ret_data.push_back(0);
+//        return ret_data;
+//    }
+//
+//    std::string_view p_int(reinterpret_cast<char*>(&value), sizeof(value));
+//
+//    uint8_t i = 0;
+//    while (*(p_int.rbegin() + i) == 0) {
+//        i++;
+//    }
+//    ret_data.insert(ret_data.end(), p_int.rbegin() + i, p_int.rend());
+//
+//    return ret_data;
+//}
+//
+//std::vector<unsigned char> EncodeField(const std::vector<unsigned char>& field)
+//{
+//    std::vector<unsigned char> rslt;
+//
+//    uint64_t fs = field.size();
+//    if (fs == 1 && (uint8_t)field.at(0) <= 0x7F) {
+//        if (field.at(0) == 0) {
+//            rslt.push_back(0x80);
+//        } else {
+//            rslt.insert(rslt.end(), field.begin(), field.end());
+//        }
+//    } else if (fs <= 55) {
+//        rslt.push_back(0x80 + fs);
+//        rslt.insert(rslt.end(), field.begin(), field.end());
+//    } else /*if (fs > 55)*/ {
+//        std::vector<unsigned char> bigint = IntToRLP(fs);
+//
+//        rslt.push_back(0xB7 + bigint.size());
+//        rslt.insert(rslt.end(), bigint.begin(), bigint.end());
+//        rslt.insert(rslt.end(), field.begin(), field.end());
+//    }
+//
+//    return rslt;
+//}
+//
+//std::vector<unsigned char> CalcTotalSize(const std::vector<unsigned char>& dump)
+//{
+//    std::vector<unsigned char> rslt;
+//    uint64_t ds = dump.size();
+//    if (ds <= 55) {
+//        rslt.push_back(0xC0 + ds);
+//        rslt.insert(rslt.end(), dump.begin(), dump.end());
+//    } else {
+//        std::vector<unsigned char> bigint = IntToRLP(ds);
+//
+//        rslt.push_back(0xF7 + bigint.size());
+//        rslt.insert(rslt.end(), bigint.begin(), bigint.end());
+//        rslt.insert(rslt.end(), dump.begin(), dump.end());
+//    }
+//
+//    return rslt;
+//}
+//
+//std::vector<unsigned char> RLP(const std::vector<std::vector<unsigned char>>& fields)
+//{
+//    std::vector<unsigned char> dump;
+//    for (const auto& field : fields) {
+//        std::vector<unsigned char> field_encoded = EncodeField(field);
+//        dump.insert(dump.end(), field_encoded.begin(), field_encoded.end());
+//    }
+//    dump = CalcTotalSize(dump);
+//    return dump;
+//}
 
-std::vector<unsigned char> IntToRLP(uint64_t value)
-{
-    std::vector<unsigned char> ret_data;
-
-    if (value == 0) {
-        ret_data.push_back(0);
-        return ret_data;
-    }
-
-    std::string_view p_int(reinterpret_cast<char*>(&value), sizeof(value));
-
-    uint8_t i = 0;
-    while (*(p_int.rbegin() + i) == 0) {
-        i++;
-    }
-    ret_data.insert(ret_data.end(), p_int.rbegin() + i, p_int.rend());
-
-    return ret_data;
-}
-
-std::vector<unsigned char> EncodeField(const std::vector<unsigned char>& field)
-{
-    std::vector<unsigned char> rslt;
-
-    uint64_t fs = field.size();
-    if (fs == 1 && (uint8_t)field.at(0) <= 0x7F) {
-        if (field.at(0) == 0) {
-            rslt.push_back(0x80);
-        } else {
-            rslt.insert(rslt.end(), field.begin(), field.end());
-        }
-    } else if (fs <= 55) {
-        rslt.push_back(0x80 + fs);
-        rslt.insert(rslt.end(), field.begin(), field.end());
-    } else /*if (fs > 55)*/ {
-        std::vector<unsigned char> bigint = IntToRLP(fs);
-
-        rslt.push_back(0xB7 + bigint.size());
-        rslt.insert(rslt.end(), bigint.begin(), bigint.end());
-        rslt.insert(rslt.end(), field.begin(), field.end());
-    }
-
-    return rslt;
-}
-
-std::vector<unsigned char> CalcTotalSize(const std::vector<unsigned char>& dump)
-{
-    std::vector<unsigned char> rslt;
-    uint64_t ds = dump.size();
-    if (ds <= 55) {
-        rslt.push_back(0xC0 + ds);
-        rslt.insert(rslt.end(), dump.begin(), dump.end());
-    } else {
-        std::vector<unsigned char> bigint = IntToRLP(ds);
-
-        rslt.push_back(0xF7 + bigint.size());
-        rslt.insert(rslt.end(), bigint.begin(), bigint.end());
-        rslt.insert(rslt.end(), dump.begin(), dump.end());
-    }
-
-    return rslt;
-}
-
-std::vector<unsigned char> RLP(const std::vector<std::vector<unsigned char>>& fields)
-{
-    std::vector<unsigned char> dump;
-    for (const auto& field : fields) {
-        std::vector<unsigned char> field_encoded = EncodeField(field);
-        dump.insert(dump.end(), field_encoded.begin(), field_encoded.end());
-    }
-    dump = CalcTotalSize(dump);
-    return dump;
-}
-
-std::string get_contract_address(const std::string& addr, uint64_t nonce)
-{
-    auto bin_addr = hex2bin(addr);
-
-    std::vector<std::vector<unsigned char>> fields;
-    fields.push_back(bin_addr);
-    std::vector<unsigned char> rlpnonce = IntToRLP(nonce);
-    fields.push_back(rlpnonce);
-    std::vector<unsigned char> rlpenc = RLP(fields);
-    sha256_2 keccak_hash = keccak(rlpenc);
-    std::vector<unsigned char> address;
-    address.push_back(0x08);
-    address.insert(address.end(), keccak_hash.begin() + 12, keccak_hash.end());
-    sha256_2 sha2_hash = get_sha256(address);
-    address.insert(address.end(), sha2_hash.begin(), sha2_hash.begin() + 4);
-    return "0x" + bin2hex(address);
-}
+//std::string get_contract_address(const std::string& addr, uint64_t nonce)
+//{
+//    auto bin_addr = hex2bin(addr);
+//
+//    std::vector<std::vector<unsigned char>> fields;
+//    fields.push_back(bin_addr);
+//    std::vector<unsigned char> rlpnonce = IntToRLP(nonce);
+//    fields.push_back(rlpnonce);
+//    std::vector<unsigned char> rlpenc = RLP(fields);
+//    sha256_2 keccak_hash = keccak(rlpenc);
+//    std::vector<unsigned char> address;
+//    address.push_back(0x08);
+//    address.insert(address.end(), keccak_hash.begin() + 12, keccak_hash.end());
+//    sha256_2 sha2_hash = get_sha256(address);
+//    address.insert(address.end(), sha2_hash.begin(), sha2_hash.begin() + 4);
+//    return "0x" + bin2hex(address);
+//}

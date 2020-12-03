@@ -127,11 +127,11 @@ bool DecentralizedApplication::try_dapp_create(const TX* tx)
         return false;
     }
 
-    std::string dapp_addr = get_contract_address(addr_from, tx->nonce);
-    if (addr_to != dapp_addr) {
-        DEBUG_COUT("not an owner");
-        return false;
-    }
+    //std::string dapp_addr = get_contract_address(addr_from, tx->nonce);
+    //if (addr_to != dapp_addr) {
+    //    DEBUG_COUT("not an owner");
+    //    return false;
+    //}
 
     if (!initialize(tx->nonce)) {
         DEBUG_COUT("already initialized");
@@ -163,11 +163,11 @@ bool DecentralizedApplication::try_dapp_modify(const TX* tx)
         return false;
     }
 
-    std::string dapp_addr = get_contract_address(addr_from, init_nonce);
-    if (addr_to != dapp_addr) {
-        DEBUG_COUT("not an owner");
-        return false;
-    }
+    //std::string dapp_addr = get_contract_address(addr_from, init_nonce);
+    //if (addr_to != dapp_addr) {
+    //    DEBUG_COUT("not an owner");
+    //    return false;
+    //}
 
     mhc_per_day = value;
 
