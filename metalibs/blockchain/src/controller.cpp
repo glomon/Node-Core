@@ -163,7 +163,16 @@ void ControllerImplementation::read_and_apply_local_chain()
     char uint64_buff[8];
     std::set<std::string> files = get_files_in_dir(path);
 
+    bool skip = !last_file.empty();
     for (const std::string& file : files) {
+        if (skip) {
+            if (fs::path(last_file).filename().string() != fs::path(file).filename().string()) {
+                continue;
+            }
+
+            skip = false;
+        }
+
         std::ifstream ifile(file.c_str(), std::ios::in | std::ios::binary);
 
         if (ifile.is_open()) {
