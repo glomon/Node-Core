@@ -159,9 +159,9 @@ int main(int argc, char** argv)
     BlockChainController blockChainController(TP, key, path, known_hash, core_list, { host, tx_port }, skip_last_forging_and_state);
 
     std::thread(libevent, std::ref(blockChainController.get_wallet_statistics()), std::ref(blockChainController.get_wallet_request_addreses()), "wsstata.metahash.io", 80, "net-test").detach();
-    std::thread(sendStat, std::ref(network), std::ref(host), tx_port, std::ref(blockChainController)).detach();
 
-    BLOCK_SERVER BS(tx_port, [&blockChainController](const std::string_view req_post, const std::string_view req_url, const std::string_view req_sign, const std::string_view req_pubk) {
+    boost::asio::io_context io_context;
+    http::server::http_server(io_context, tx_port, [&blockChainController](const std::string& req_post, const std::string& req_url, const std::string& req_sign, const std::string& req_pubk) {
         if (req_url == "getinfo") {
             static const std::string version = std::string(VESION_MAJOR) + "." + std::string(VESION_MINOR) + "." + std::string(GIT_COUNT);
             rapidjson::StringBuffer s;
@@ -181,42 +181,27 @@ int main(int argc, char** argv)
             writer.EndObject();
             return std::string(s.GetString());
         } else {
-            //        DEBUG_COUT(url_sw);
+            //DEBUG_COUT(req_url);
+            //DEBUG_COUT(req_sign);
+            //DEBUG_COUT(req_pubk);
             return blockChainController.add_pack_to_queue(req_post, req_url, req_sign, req_pubk);
         }
     });
-    BS.start();
 
-    // http_server(TP, tx_port, [&blockChainController](HTTP_SERVER_IO* io_struct) {
-    //     //        return "Hello World";
-    //     std::string_view pack_sw(io_struct->req_post);
+    auto thread_count = std::thread::hardware_concurrency() - 1;
+    std::vector<std::thread> threadpool(thread_count);
 
-    //     std::string path = io_struct->req_path;
-    //     path.erase(std::remove(path.begin(), path.end(), '/'), path.end());
-    //     std::string_view url_sw(path);
+    for (uint i = 0; i < thread_count; i++) {
+        threadpool.emplace_back([&io_context]() {
+            io_context.run();
+        });
+    }
 
-    //     if (path == "getinfo") {
-    //         static const std::string version = std::string(VESION_MAJOR) + "." + std::string(VESION_MINOR) + "." + std::string(GIT_COMMIT_HASH);
-    //         rapidjson::StringBuffer s;
-    //         rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-    //         writer.StartObject();
-    //         {
-    //             writer.String("result");
-    //             writer.StartObject();
-    //             {
-    //                 writer.String("version");
-    //                 writer.String(version.c_str());
-    //                 writer.String("mh_addr");
-    //                 writer.String(blockChainController.get_str_address().c_str());
-    //             }
-    //             writer.EndObject();
-    //         }
-    //         writer.EndObject();
-    //         return std::string(s.GetString());
-    //     } else {
-    //         return blockChainController.add_pack_to_queue(pack_sw, url_sw);
-    //     }
-    // });
+    io_context.run();
+
+    for (auto& t : threadpool) {
+        t.join();
+    }
 }
 
 __attribute__((__noreturn__)) void sendStat(const std::string& network, std::string&, int, BlockChainController& BlckChnCtrl)

@@ -43,6 +43,13 @@ include_directories(${PROJECT_BINARY_DIR}/generated)
 
 ################################################################################
 
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.66.0 REQUIRED coroutine)
+
+include_directories(${Boost_INCLUDE_DIRS})
+
+################################################################################
+
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/blockserver.cpp
@@ -55,8 +62,10 @@ target_link_libraries(${PROJECT_NAME} meta_log)
 target_link_libraries(${PROJECT_NAME} metachain)
 target_link_libraries(${PROJECT_NAME} metacrypto)
 #target_link_libraries(${PROJECT_NAME} mh_libevent)
-target_link_libraries(${PROJECT_NAME} mh_mhd)
+#target_link_libraries(${PROJECT_NAME} mh_mhd)
 target_link_libraries(${PROJECT_NAME} moodycamel)
 # target_link_libraries(${PROJECT_NAME} net_io)
 target_link_libraries(${PROJECT_NAME} mhcurl)
 target_link_libraries(${PROJECT_NAME} rapidjson)
+
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
