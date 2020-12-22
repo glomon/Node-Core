@@ -27,7 +27,7 @@ bool CurlFetch::post(const std::string& url, const std::string& reques_string, s
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, reques_string.data());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlwritefunc);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 60L);
     int ret = curl_easy_perform(curl);
 
     if (!ret) {
